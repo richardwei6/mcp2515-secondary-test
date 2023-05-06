@@ -11,19 +11,27 @@ void setup() {
   Serial.begin(9600);
 }
 
-uint8_t c = 0;
+struct can_frame frame;
 
 void loop() {
   // put your main code here, to run repeatedly:
-  struct can_frame frame;
-  frame.can_id = 0x001;
-  frame.can_dlc = 1;
-  frame.data[0] = c;
+  
+  frame = can_frame();
 
-  mcp2515.sendMessage(&frame);
+  if (mcp2515.readMessage(&frame) == MCP2515::ERROR_OK && frame.can_id == 1){
+    Serial.print("recv can req frame; data = ");
+    Serial.println(frame.data[0]);
+    
+    //
 
-  Serial.print("sent msg = ");
-  Serial.println(c);
-  c++;
+    frame = can_frame();
+
+    frame.can_id = 2;
+    frame.can_dlc = 1;
+    frame.data[0] = 2;
+
+    mcp2515.sendMessage(&frame);
+  }
+
   delay(50);  
 }
